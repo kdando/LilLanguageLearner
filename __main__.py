@@ -1,35 +1,51 @@
+from flask import Flask, render_template, request
+from spanish_vocab import spanish_words as words
 import random
 
-from spanish_vocab import spanish_words as words
+app = Flask(__name__)
 
-def greet_user(name):
-    print(f"Hello, {name}! Welcome to the Lil Language Learner.\nThis app will help you learn the 100 most common words of your chosen language - a solid basis to actually communicate. You will be asked 10 questions at a time.\nPress Enter to start the quiz.")
+#####################FUNCTIONS
 
-name = input("What's your name?\n")
+def greet_user(username):
+    return f"Hello, {username}! Welcome to the Lil Language Learner.\nThis app will help you learn the 100 most common words of your chosen language - a solid basis to actually communicate!"
 
-greet_user(name)
+def set_question():
+    current_word = random.choice(words)
+    spanish_word = list(current_word.keys())[0]
+    english_translation = current_word[spanish_word]
+    return spanish_word, english_translation
 
-score = 0
-language = words
+def run_quiz(spanish_word, english_translation, answer):
+    if answer in english_translation:
+        return "Correct!"
+    else:
+        return f"Incorrect :( '{spanish_word}' means '{english_translation[0]}'."
 
-def run_quiz(score, language):
+####################ROUTES
 
-    while score >= 0 and score < 5:
-        current_word = random.choice(words)
-        spanish_word = list(current_word.keys())[0]
-        english_translation = current_word[spanish_word]
+@app.route("/", methods=["GET", "POST"])
+def index():
+    username = None
+    if request.method == "POST":
+        username = request.form.get("username")
+        return render_template("quiz.html")
+    return render_template("index.html",username=username)
 
-        users_answer = input(f"What does {spanish_word} mean?\n")
+@app.route("/quiz", methods=["POST"])
+def quiz():
+    spanish_word, english_translation = set_question()
+    return render_template('quiz.html', greeting=greet_user(request.form.get("username")), spanish_word=spanish_word, english_translation=english_translation)
 
-        if users_answer in english_translation:
-            score += 1
-            print(f"Correct! Your current score is {score}.")
-        else:
-            score -= 1
-            print(f"Incorrect. '{spanish_word}' means '{english_translation[0]}'.\nYour current score is {score}.")
-            
+@app.route("/result", methods=["POST"])
+def result():
+    answer = request.form.get("answer")
+    spanish_word = request.form.get("spanish_word")
+    english_translation = request.form.get("english_translation")
+    judgement = run_quiz(spanish_word, english_translation, answer)
+    return render_template("result.html", result=judgement, spanish_word=spanish_word, english_translation=english_translation)
 
-run_quiz(score, language)
+#####################
 
-
+if __name__ == '__main__':
+    app.run(debug=True)
 
