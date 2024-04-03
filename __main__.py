@@ -1,48 +1,87 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 from spanish_vocab import spanish_words as words
 import random
 
 app = Flask(__name__)
+app.secret_key = 'abcdefg'
+
+app.config.update(
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=False
+)
 
 #####################FUNCTIONS
 
 def greet_user(username):
     return f"Hello, {username}! Welcome to the Lil Language Learner.\nThis app will help you learn the 100 most common words of your chosen language - a solid basis to actually communicate!"
 
+##########INCREMENT CURRENT QUESTION
+
+def increment_current_question():
+    if 'current_question' not in session:
+        session['current_question'] = 1
+    else:
+        session['current_question'] += 1
+
+#########CHECK IF ALL QUESTIONS ANSWERED
+def check_all_questions_answered():
+    return session.get('current_question', 0) >= session.get('total_questions', 0)
+
+#########SET QUESTION
+#could be cleaner
+
 def set_question():
     current_word = random.choice(words)
     spanish_word = list(current_word.keys())[0]
     english_translation = current_word[spanish_word]
-    return spanish_word, english_translation
+    return { spanish_word: spanish_word, english_translation: english_translation }
 
-def run_quiz(spanish_word, english_translation, answer):
-    if answer in english_translation:
+#########CHECK ANSWER
+
+def check_answer(spanish_word, english_translation, answer):
+    if answer.lower() in english_translation:
+        session['score'] = session.get('score') + 1
         return "Correct!"
     else:
         return f"Incorrect :( '{spanish_word}' means '{english_translation[0]}'."
 
 ####################ROUTES
 
+#if method is post that means form has been submitted and quiz starts, if its get then user is visiting the welcome page for the first time and hasnt chosen quiz settings (i.e. total questions)
 @app.route("/", methods=["GET", "POST"])
 def index():
-    username = None
+    print("HELLO")
+    app.logger.info('UUUUUUH HELLOOOOOOO')
     if request.method == "POST":
-        username = request.form.get("username")
-        return render_template("quiz.html")
-    return render_template("index.html",username=username)
+        session['username'] = request.form.get("username")
+        session['total_questions'] = request.form.get("total_questions")
+        session['score'] = 0
+        return render_template("quiz.html", greeting=greet_user(session["username"]))
+    return render_template("index.html")
 
-@app.route("/quiz", methods=["POST"])
+
+@app.route("/quiz", methods=["GET", "POST"])
 def quiz():
-    spanish_word, english_translation = set_question()
-    return render_template('quiz.html', greeting=greet_user(request.form.get("username")), spanish_word=spanish_word, english_translation=english_translation)
+    #if all qs answered we go to results
 
-@app.route("/result", methods=["POST"])
+    # if check_all_questions_answered():
+    #     print("all answered")
+    #     return render_template("result.html")
+    
+    #if not all qs answered and we posted we check, then go to quiz again with a new q
+    if request.method == "POST":
+        increment_current_question()
+        if check_all_questions_answered():
+            return render_template("result.html")
+        else:
+            return render_template("quiz.html", greeting=greet_user(session['username']), **set_question())
+    
+    #if method is get, i.e. quiz page loads for first time
+    return render_template("quiz.html", greeting=greet_user(session['username']), **set_question())
+
+@app.route("/result", methods=["GET", "POST"])
 def result():
-    answer = request.form.get("answer")
-    spanish_word = request.form.get("spanish_word")
-    english_translation = request.form.get("english_translation")
-    judgement = run_quiz(spanish_word, english_translation, answer)
-    return render_template("result.html", result=judgement, spanish_word=spanish_word, english_translation=english_translation)
+    return render_template("result.html")
 
 #####################
 
