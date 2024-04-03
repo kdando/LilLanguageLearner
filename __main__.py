@@ -30,7 +30,7 @@ def increment_current_question():
 
 #########CHECK IF ALL QUESTIONS ANSWERED
 def check_all_questions_answered():
-    return session.get('current_question', 0) >= session.get('total_questions', 0)
+    return session.get('current_question', 0) >= int(session.get('total_questions'), 0)
 
 #########SET QUESTION
 #could be cleaner
@@ -39,7 +39,7 @@ def set_question():
     current_word = random.choice(words)
     spanish_word = list(current_word.keys())[0]
     english_translation = current_word[spanish_word]
-    return { "spanish_word": spanish_word, "english_translation": english_translation }
+    return spanish_word, english_translation
 
 #########CHECK ANSWER
 
@@ -67,9 +67,9 @@ def index():
 def quiz():
     #if all qs answered we go to results
 
-    # if check_all_questions_answered():
-    #     print("all answered")
-    #     return render_template("result.html")
+    if check_all_questions_answered():
+        print("all answered")
+        return render_template("result.html")
     
     #if not all qs answered and we posted we check, then go to quiz again with a new q
     if request.method == "POST":
@@ -77,10 +77,15 @@ def quiz():
         # if check_all_questions_answered():
         #     return render_template("result.html")
         # else:
-        return render_template("quiz.html", greeting=greet_user(session['username']), **set_question())
+
+        new_question = set_question()
+        spanish_word = new_question[0]
+        english_translation = new_question[1]
+
+        return render_template("quiz.html", greeting=greet_user(session['username']), spanish_word=spanish_word, english_translation=english_translation)
     
     #if method is get, i.e. quiz page loads for first time
-    return render_template("quiz.html", greeting=greet_user(session['username']), **set_question())
+    return render_template("quiz.html", greeting=greet_user(session['username']), spanish_word=spanish_word, english_translation=english_translation)
 
 @app.route("/result", methods=["GET", "POST"])
 def result():
