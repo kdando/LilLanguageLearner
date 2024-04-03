@@ -3,12 +3,16 @@ from spanish_vocab import spanish_words as words
 import random
 
 app = Flask(__name__)
-app.secret_key = 'abcdefg'
+app.secret_key = 'a2b2c2d2e2f2g'
 
-app.config.update(
-    SESSION_COOKIE_SAMESITE='Lax',
-    SESSION_COOKIE_SECURE=False
+# Configure session cookie settings
+app.config.update( 
+    SESSION_COOKIE_HTTPONLY=True,  # Prevent JavaScript access to session cookie
+    SESSION_COOKIE_SAMESITE='Lax',  # Restrict cookie to same-site requests
+    SESSION_COOKIE_SECURE=True  # Only send cookie over HTTPS
 )
+
+##############
 
 #####################FUNCTIONS
 
@@ -23,10 +27,6 @@ def increment_current_question():
     else:
         session['current_question'] += 1
 
-#########CHECK IF ALL QUESTIONS ANSWERED
-def check_all_questions_answered():
-    return session.get('current_question', 0) >= session.get('total_questions', 0)
-
 #########SET QUESTION
 #could be cleaner
 
@@ -34,13 +34,13 @@ def set_question():
     current_word = random.choice(words)
     spanish_word = list(current_word.keys())[0]
     english_translation = current_word[spanish_word]
-    return { spanish_word: spanish_word, english_translation: english_translation }
+    return spanish_word, english_translation
 
 #########CHECK ANSWER
 
 def check_answer(spanish_word, english_translation, answer):
     if answer.lower() in english_translation:
-        session['score'] = session.get('score') + 1
+        session['score'] += 1
         return "Correct!"
     else:
         return f"Incorrect :( '{spanish_word}' means '{english_translation[0]}'."
@@ -50,34 +50,48 @@ def check_answer(spanish_word, english_translation, answer):
 #if method is post that means form has been submitted and quiz starts, if its get then user is visiting the welcome page for the first time and hasnt chosen quiz settings (i.e. total questions)
 @app.route("/", methods=["GET", "POST"])
 def index():
-    print("HELLO")
-    app.logger.info('UUUUUUH HELLOOOOOOO')
+    if request.method == "GET":
+        session.clear()
+        return render_template("index.html")
+    
     if request.method == "POST":
         session['username'] = request.form.get("username")
         session['total_questions'] = request.form.get("total_questions")
         session['score'] = 0
+        session['current_question'] = 1
+        new_question = set_question()
+        session['spanish_word'] = new_question[0]
+        session['english_translation'] = new_question[1]
         return render_template("quiz.html", greeting=greet_user(session["username"]))
-    return render_template("index.html")
-
+    
 
 @app.route("/quiz", methods=["GET", "POST"])
 def quiz():
-    #if all qs answered we go to results
 
-    # if check_all_questions_answered():
-    #     print("all answered")
-    #     return render_template("result.html")
-    
-    #if not all qs answered and we posted we check, then go to quiz again with a new q
+    # increment the current question number
+    session['current_question'] += 1
+
+    # if posting, i.e. an answer given..
     if request.method == "POST":
-        increment_current_question()
-        if check_all_questions_answered():
+        #check previous answer
+        session['answer'] = request.form.get('answer')
+        check_answer(session['spanish_word'], session['english_translation'], session['answer'])
+
+        #having checked last given answer, we go to results if we've reached last question
+        #this will only happen on POST route as GET would mean no answers yet given
+        if session['current_question'] > int(session['total_questions']):
             return render_template("result.html")
-        else:
-            return render_template("quiz.html", greeting=greet_user(session['username']), **set_question())
+
+        #set a new question
+        new_question = set_question()
+        session['spanish_word'] = new_question[0]
+        session['english_translation'] = new_question[1]
+
+        #render quiz again with new question
+        return render_template("quiz.html", greeting=greet_user(session['username']))
     
-    #if method is get, i.e. quiz page loads for first time
-    return render_template("quiz.html", greeting=greet_user(session['username']), **set_question())
+    #if method is GET, i.e. quiz page loads for first time
+    return render_template("quiz.html", greeting=greet_user(session['username']))
 
 @app.route("/result", methods=["GET", "POST"])
 def result():
