@@ -2,13 +2,18 @@ from flask import Flask, render_template, request, session
 from spanish_vocab import spanish_words as words
 import random
 
-app = Flask(__name__)
-app.secret_key = 'abcdefg'
 
-app.config.update(
-    SESSION_COOKIE_SAMESITE='Lax',
-    SESSION_COOKIE_SECURE=False
+app = Flask(__name__)
+app.secret_key = 'a2b2c2d2e2f2g'
+
+# Configure session cookie settings
+app.config.update( 
+    SESSION_COOKIE_HTTPONLY=True,  # Prevent JavaScript access to session cookie
+    SESSION_COOKIE_SAMESITE='Lax',  # Restrict cookie to same-site requests
+    SESSION_COOKIE_SECURE=True  # Only send cookie over HTTPS
 )
+
+##############
 
 #####################FUNCTIONS
 
@@ -34,13 +39,13 @@ def set_question():
     current_word = random.choice(words)
     spanish_word = list(current_word.keys())[0]
     english_translation = current_word[spanish_word]
-    return { spanish_word: spanish_word, english_translation: english_translation }
+    return { "spanish_word": spanish_word, "english_translation": english_translation }
 
 #########CHECK ANSWER
 
 def check_answer(spanish_word, english_translation, answer):
     if answer.lower() in english_translation:
-        session['score'] = session.get('score') + 1
+        session['score'] += 1
         return "Correct!"
     else:
         return f"Incorrect :( '{spanish_word}' means '{english_translation[0]}'."
@@ -50,8 +55,6 @@ def check_answer(spanish_word, english_translation, answer):
 #if method is post that means form has been submitted and quiz starts, if its get then user is visiting the welcome page for the first time and hasnt chosen quiz settings (i.e. total questions)
 @app.route("/", methods=["GET", "POST"])
 def index():
-    print("HELLO")
-    app.logger.info('UUUUUUH HELLOOOOOOO')
     if request.method == "POST":
         session['username'] = request.form.get("username")
         session['total_questions'] = request.form.get("total_questions")
@@ -71,10 +74,10 @@ def quiz():
     #if not all qs answered and we posted we check, then go to quiz again with a new q
     if request.method == "POST":
         increment_current_question()
-        if check_all_questions_answered():
-            return render_template("result.html")
-        else:
-            return render_template("quiz.html", greeting=greet_user(session['username']), **set_question())
+        # if check_all_questions_answered():
+        #     return render_template("result.html")
+        # else:
+        return render_template("quiz.html", greeting=greet_user(session['username']), **set_question())
     
     #if method is get, i.e. quiz page loads for first time
     return render_template("quiz.html", greeting=greet_user(session['username']), **set_question())
