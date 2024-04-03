@@ -27,10 +27,6 @@ def increment_current_question():
     else:
         session['current_question'] += 1
 
-#########CHECK IF ALL QUESTIONS ANSWERED
-def check_all_questions_answered():
-    return session.get('current_question', 0) >= int(session.get('total_questions'), 0)
-
 #########SET QUESTION
 #could be cleaner
 
@@ -62,44 +58,39 @@ def index():
         session['username'] = request.form.get("username")
         session['total_questions'] = request.form.get("total_questions")
         session['score'] = 0
+        session['current_question'] = 1
+        new_question = set_question()
+        session['spanish_word'] = new_question[0]
+        session['english_translation'] = new_question[1]
         return render_template("quiz.html", greeting=greet_user(session["username"]))
     
-
 
 @app.route("/quiz", methods=["GET", "POST"])
 def quiz():
 
-    if request.method == "POST" or request.method == "GET":
+    # increment the current question number
+    session['current_question'] += 1
+
+    # if posting, i.e. an answer given..
+    if request.method == "POST":
+        #check previous answer
+        session['answer'] = request.form.get('answer')
+        check_answer(session['spanish_word'], session['english_translation'], session['answer'])
+
+        #having checked last given answer, we go to results if we've reached last question
+        #this will only happen on POST route as GET would mean no answers yet given
+        if session['current_question'] > int(session['total_questions']):
+            return render_template("result.html")
+
+        #set a new question
         new_question = set_question()
         session['spanish_word'] = new_question[0]
         session['english_translation'] = new_question[1]
-    #if all qs answered we go to results
 
-    if 'current_question' not in session:
-        session['current_question'] = 1
-    else:
-        session['current_question'] += 1
-
-    if session['current_question'] > int(session['total_questions']):
-        return render_template("result.html")
-    
-    #if not all qs answered and we posted we check, then go to quiz again with a new q
-    if request.method == "POST":
-
-        if 'current_question' not in session:
-            session['current_question'] = 1
-        else:
-            session['current_question'] += 1
-        
-        # if check_all_questions_answered():
-        #     return render_template("result.html")
-        # else:
-
-        
-
+        #render quiz again with new question
         return render_template("quiz.html", greeting=greet_user(session['username']))
     
-    #if method is get, i.e. quiz page loads for first time
+    #if method is GET, i.e. quiz page loads for first time
     return render_template("quiz.html", greeting=greet_user(session['username']))
 
 @app.route("/result", methods=["GET", "POST"])
