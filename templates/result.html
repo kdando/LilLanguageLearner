@@ -3,13 +3,17 @@
 {% block title %}LLL - Results{% endblock %}
 
 {% block content %}
-<main class="container bg-primary">
-    <div class="card">
-        <h2 class="card-header">{{ session['username'] }}'s Results:</h2>
-        <div class="card-body">
-            <h3 class="card-title">{{ session['score'] }} out of {{ session['total_questions'] }}</h3>
-            <button onclick="window.location.href = '/'" class="btn btn-info">Play Again</button>
+<main class="container bg-primary ">
+    <div class="card ">
+        <h2 class="card-header text-center">{{ session['username'] }}'s Results:</h2>
+        <div class="card-body text-center">
+            <h3 class="card-title text-center mb-5">{{ session['score'] }} out of {{ session['total_questions'] }}</h3>
+            <p><button onclick="window.location.href = '/'" class="btn btn-info">Play Again</button></p>
         </div>
+    </div>
+
+    <div class="card bg-info text-primary">
+        <p>This is a test div, possibly results go here</p>
     </div>
 </main>
 {%- endblock %}
