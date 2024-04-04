@@ -1,25 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLL Quiz</title>
-</head>
-<body>
-    <h1>{{ greeting }}</h1>
+{%- extends "base.html" %} 
+
+{% block title %}LLL - Quiz{% endblock %}
+
+{% block content %}
+<main class="container bg-primary">
+    <p>{{ greeting }}</p>
 
     <form action="/quiz" method="POST">
-        <label for="answer">Translate the following word:</label>
-        <h2>{{ session['spanish_word'] }} is spanish word</h2>
-        <h3>{{  session['english_translation'] }} is english trans</h3>
-        <p>{{ session['total_questions'] }} is total question</p>
-        <p>{{ session['current_question'] }} is current question</p>
-        <p>{{ session['score'] }} is score</p>
-        <!-- Hidden field to pass the correct answer to result page on form submission -->
-        <input type="hidden" name="spanish_word" value="{{ spanish_word }}">
-        <input type="hidden" name="english_translation" value="{{ english_translation }}"> 
-        <input type="text" id="answer" name="answer" required>
-        <button type="submit">Submit</button>
+        <div>
+            <h2>Translate the following word:</h2>
+            <h1 class="blockquote">{{ session['spanish_word'] }}</h1>
+        </div>
+        
+        <div>
+            <label for="answer" class="form-label">Your Answer:</label>
+            <input type="text" id="answer" name="answer" required class="form-control">
+            <button type="submit" class="btn btn-info">Submit</button>
+        </div>
     </form>
-</body>
-</html>
+    
+    <div>
+        <p>Question {{ session['current_question'] }} of {{ session['total_questions'] }}</p>
+        <p>Current score: {{ session['score'] }}</p>
+    </div>
+</main>
+{%- endblock %}

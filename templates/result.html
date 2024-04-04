@@ -1,11 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLL Result</title>
-</head>
-<body>
-    <p>Your score is {{ session['score'] }}</p>
-</body>
-</html>
+{%- extends "base.html" %} 
+
+{% block title %}LLL - Results{% endblock %}
+
+{% block content %}
+<main class="container bg-primary">
+    <div class="card">
+        <h2 class="card-header">{{ session['username'] }}'s Results:</h2>
+        <div class="card-body">
+            <h3 class="card-title">{{ session['score'] }} out of {{ session['total_questions'] }}</h3>
+            <button onclick="window.location.href = '/'" class="btn btn-info">Play Again</button>
+        </div>
+    </div>
+</main>
+{%- endblock %}
