@@ -3,18 +3,25 @@
 {% block title %}LLL - Quiz{% endblock %}
 
 {% block content %}
-<main>
+<main class="container bg-primary">
     <p>{{ greeting }}</p>
 
     <form action="/quiz" method="POST">
-        <h2>Translate the following word:</h2>
-        <h1>{{ session['spanish_word'] }}</h1>
-        <!-- <h3>{{  session['english_translation'] }} is english trans</h3> -->
+        <div>
+            <h2>Translate the following word:</h2>
+            <h1 class="blockquote">{{ session['spanish_word'] }}</h1>
+        </div>
+        
+        <div>
+            <label for="answer" class="form-label">Your Answer:</label>
+            <input type="text" id="answer" name="answer" required class="form-control">
+            <button type="submit" class="btn btn-info">Submit</button>
+        </div>
+    </form>
+    
+    <div>
         <p>Question {{ session['current_question'] }} of {{ session['total_questions'] }}</p>
         <p>Current score: {{ session['score'] }}</p>
-        <label for="answer">Your Answer:</label>
-        <input type="text" id="answer" name="answer" required>
-        <button type="submit">Submit</button>
-    </form>
+    </div>
 </main>
 {%- endblock %}

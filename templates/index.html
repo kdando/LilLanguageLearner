@@ -3,15 +3,23 @@
 {% block title %}LLL - Welcome{% endblock %}
 
 {% block content %}
-<main>
-    <h1>Welcome to the Lil Language Learner</h1>
-    <p>The current language is <strong>Spanish</strong></p>
+<main class="container bg-primary">
+    <div class="container">
+        <h1>Welcome to the Lil Language Learner</h1>
+        <p>The current language is <strong>Spanish</strong></p>
+    </div>
+    
     <form action="/" method="POST">
-        <label for="name">What should we call you?</label>
-        <input type="text" id="name" name="username" required>
-        <label for="name">How many questions should we ask?</label>
-        <input type="number" id="total_questions" name="total_questions" required>
-        <button type="submit">Let's Go!</button>
+        <div>
+           <label for="name" class="form-label">What should we call you?</label>
+            <input type="text" id="name" name="username" required class="form-control">     
+        </div>
+        
+        <div>
+            <label for="name" class="form-label">How many questions should we ask?</label>
+            <input type="number" id="total_questions" name="total_questions" required class="form-control">
+        </div>
+        <button type="submit" class="btn btn-info">Let's Go!</button>
     </form>
 </main>
 {%- endblock %}
