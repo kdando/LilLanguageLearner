@@ -1,7 +1,13 @@
 from flask import Flask, render_template, request, session
 from flask_bootstrap import Bootstrap
 
-from spanish_vocab import spanish_words as words
+from spanish_vocab import spanish_words
+from french_vocab import french_words
+from arabic_vocab import arabic_words
+from german_vocab import german_words
+from mandarin_vocab import mandarin_words
+from russian_vocab import russian_words
+
 import random
 
 # Create app
@@ -21,7 +27,7 @@ app.config.update(
 #####################FUNCTIONS
 
 def greet_user(username):
-    return f"Hello, {username}! Welcome to the Lil Language Learner.\nThis app will help you learn the 100 most common words of your chosen language - a solid basis to actually communicate!"
+    return f"Hello, {username}! Welcome to the Lil Language Learner. This app will help you learn the 100 most common words of your chosen language - a solid basis to actually communicate!"
 
 ##########INCREMENT CURRENT QUESTION
 
@@ -35,19 +41,32 @@ def increment_current_question():
 #could be cleaner
 
 def set_question():
+
+    # get selected language from dictionary mapping w form input
+    languages = {
+        "spanish": spanish_words,
+        "french": french_words,
+        "german": german_words,
+        "russian": russian_words,
+        "arabic": arabic_words,
+        "mandarin": mandarin_words,
+    }
+    words = languages.get(session['language'])
+
+    # assign random word from selected language
     current_word = random.choice(words)
-    spanish_word = list(current_word.keys())[0]
-    english_translation = current_word[spanish_word]
-    return spanish_word, english_translation
+    foreign_word = list(current_word.keys())[0]
+    english_translation = current_word[foreign_word]
+    return foreign_word, english_translation
 
 #########CHECK ANSWER
 
-def check_answer(spanish_word, english_translation, answer):
+def check_answer(foreign_word, english_translation, answer):
     if answer.lower() in english_translation:
         session['score'] += 1
         return "Correct!"
     else:
-        return f"Incorrect :( '{spanish_word}' means '{english_translation[0]}'."
+        return f"Incorrect :( '{foreign_word}' means '{english_translation[0]}'."
 
 ####################ROUTES
 
@@ -61,13 +80,13 @@ def index():
     if request.method == "POST":
         session['username'] = request.form.get("username")
         session['total_questions'] = request.form.get("total_questions")
+        session['language'] = request.form.get("language")
         session['score'] = 0
         session['current_question'] = 1
         new_question = set_question()
-        session['spanish_word'] = new_question[0]
+        session['foreign_word'] = new_question[0]
         session['english_translation'] = new_question[1]
         return render_template("quiz.html", greeting=greet_user(session["username"]))
-    
 
 @app.route("/quiz", methods=["GET", "POST"])
 def quiz():
@@ -79,7 +98,7 @@ def quiz():
     if request.method == "POST":
         #check previous answer
         session['answer'] = request.form.get('answer')
-        check_answer(session['spanish_word'], session['english_translation'], session['answer'])
+        check_answer(session['foreign_word'], session['english_translation'], session['answer'])
 
         #having checked last given answer, we go to results if we've reached last question
         #this will only happen on POST route as GET would mean no answers yet given
@@ -88,7 +107,7 @@ def quiz():
 
         #set a new question
         new_question = set_question()
-        session['spanish_word'] = new_question[0]
+        session['foreign_word'] = new_question[0]
         session['english_translation'] = new_question[1]
 
         #render quiz again with new question
