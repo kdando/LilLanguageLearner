@@ -1,8 +1,12 @@
 from flask import Flask, render_template, request, session
+from flask_bootstrap import Bootstrap
+
 from spanish_vocab import spanish_words as words
 import random
 
+# Create app
 app = Flask(__name__)
+Bootstrap(app)
 app.secret_key = 'a2b2c2d2e2f2g'
 
 # Configure session cookie settings
