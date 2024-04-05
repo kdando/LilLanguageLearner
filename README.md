@@ -1,7 +1,7 @@
 
 # Lil Language Learner
 
-A language learning app that streamlines acquisition by focusing on the core vocabulary. Perfect for beginners, LLL provides an efficient way to grasp the essential building blocks of communication.
+A simple quiz-based language learning app that streamlines acquisition by focusing on the core vocabulary. Perfect for beginners, LLL provides an efficient way to grasp the essential building blocks of communication.
 
 
 
