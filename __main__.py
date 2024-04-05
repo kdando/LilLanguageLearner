@@ -68,9 +68,9 @@ def set_question():
 def check_answer(foreign_word, english_translation, answer):
     if answer.lower() in english_translation:
         session['score'] += 1
-        return "Correct!"
+        return "Correct!", True
     else:
-        return f"Incorrect :( '{foreign_word}' means '{english_translation[0]}'."
+        return f"Incorrect :( '{foreign_word}' means '{english_translation[0]}'.", False
 
 ####################ROUTES
 
@@ -82,6 +82,7 @@ def index():
         return render_template("index.html")
     
     if request.method == "POST":
+        session['user_results'] = []
         session['username'] = request.form.get("username")
         session['total_questions'] = request.form.get("total_questions")
         session['language'] = request.form.get("language")
@@ -102,7 +103,13 @@ def quiz():
     if request.method == "POST":
         #check previous answer
         session['answer'] = request.form.get('answer')
-        check_answer(session['foreign_word'], session['english_translation'], session['answer'])
+        session['previous_answer'] = check_answer(session['foreign_word'], session['english_translation'], session['answer'])
+
+        session['user_results'].append({ 
+            "foreign_word": session['foreign_word'], 
+            "english_translation": session['english_translation'],
+            "user_answer": session['answer'],
+            "result": session['previous_answer'][1]})
 
         #having checked last given answer, we go to results if we've reached last question
         #this will only happen on POST route as GET would mean no answers yet given

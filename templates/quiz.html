@@ -7,6 +7,11 @@
     <h4>{{ greeting }}</h4>
 
     <form action="/quiz" method="POST">
+
+        {% if session['previous_answer'] %}
+        <h4 class="text-center">{{ session['previous_answer'][0] }}</h4>
+        {% endif %}
+
         <div class="text-center">
             <h2>Translate the following word:</h2>
             <h1 class="blockquote">{{ session['foreign_word'] }}</h1>
@@ -19,7 +24,7 @@
         </div>
     </form>
     
-    <div class="container text-center">
+    <div class="text-center">
         <p>Question {{ session['current_question'] }} of {{ session['total_questions'] }}</p>
         <p>Current score: {{ session['score'] }}</p>
     </div>
