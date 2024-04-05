@@ -10,6 +10,10 @@ from russian_vocab import russian_words
 
 import random
 
+##############################################
+# THIS IS THE DEVELOPMENT ENTRY POINT. DEPLOYED LIVE VERSION USES APP.PY
+#############################################
+
 # Create app
 app = Flask(__name__)
 Bootstrap(app)
