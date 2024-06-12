@@ -64,7 +64,7 @@ def create_app():
     def check_answer(foreign_word, english_translation, answer):
         if answer.lower() in english_translation:
             session['score'] += 1
-            return "Correct!", True
+            return "That's right!", True
         else:
             return f"Incorrect :( '{foreign_word}' means '{english_translation[0]}'.", False
 
